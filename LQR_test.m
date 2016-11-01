@@ -27,34 +27,40 @@ end
 
 K=LQR_timevarying(A,B,Q,R,t);
 
-%Now plot some things
-%open loop (Need to plot this response for time-varying matrices. Like, 
-%define a tiny time step and apply the dynamics at each time because the
-%matrices could be time-varying
-%Currently it's just plotting the same time response for each 
-%matrix in the time step on top of itself)
-u = zeros(size(t));
-x0 = [0.2 0];
-figure;
-for i = 1:length(t)-1
-    sys = ss(A{i},B{i},C{i},D{i});
-    [y, t_int, x] = lsim(sys,u,t,x0);
-    x0(1)=x0(1)+(y(2)-x0(1));
-    plot(t_int,y, 'b');
-    hold on;
-    title('Open-Loop Response to Non-Zero Initial Condition')
-    xlabel('Time (sec)')
-    ylabel('Position (m)')
+%Now to see if K(t) is really working
+%Say we have a nonlinear system that we linearize and put in state-space
+%form. Then x_tilde is the coordinates (x, x_dot) of the linearized system
+%and x_ol is the response of the system with no feedback control
+%optimal solution
+
+%Solve the linearized problem
+%IC for x1, x2
+x1(1)=0.2; %position
+x2(1)=0; %velocity
+dt=t(2)-t(1);
+for i=1:length(t)-1
+    x1_intermed=x1(i)+dt/2*x1_dot(A{i},B{i},x1(i),x2(i),F);
+    x2_intermed=x2(i)+dt/2*x2_dot(A{i},B{i},x1(i),x2(i),F);
+    x1(i+1)=x1(i)+dt/2*(x1_dot(A{i},B{i},x1(i),x2(i),F)+...
+        x1_dot(A{i+1},B{i+1},x1_intermed,x2_intermed,F));
+    x2(i+1)=x2(i)+dt/2*(x2_dot(A{i},B{i},x1(i),x2(i),F)+...
+        x2_dot(A{i+1},B{i+1},x1_intermed,x2_intermed,F));
 end
 
-%closed loop (I am not doing this right)
-figure;
-for i = 1:length(t)-1
-    sys_cl = ss(A{i}-B{i}*K{i},B{i},C{i},D{i});
-    [y2, t_int2, x2] = lsim(sys_cl,u,t,x0);
-    plot(t_int2, y2);
-    hold on;
-    title('Linear Simulation Results')
-    xlabel('Time (sec)')
-    ylabel('Position (m)')
+%Now try the same thing but with (A-B*K)x+BKrr? What is Krr? (I'm using F(t) for now)
+x1c(1)=0.2;
+x2c(1)=0;
+for i=1:length(t)-1
+    x1c_intermed=x1c(i)+dt/2*x1_feedback(A{i},B{i},K{i},x1c(i),x2c(i),F);
+    x2c_intermed=x2c(i)+dt/2*x2_feedback(A{i},B{i},K{i},x1c(i),x2c(i),F);
+    x1c(i+1)=x1c(i)+dt/2*(x1_feedback(A{i},B{i},K{i},x1c(i),x2c(i),F)+...
+        x1_feedback(A{i+1},B{i+1},K{i+1},x1c_intermed,x2c_intermed,F));
+    x2c(i+1)=x2c(i)+dt/2*(x2_feedback(A{i},B{i},K{i},x1c(i),x2c(i),F)+...
+        x2_feedback(A{i+1},B{i+1},K{i+1},x1c_intermed,x2c_intermed,F));
 end
+
+figure;
+plot(t,x1,t,x1c);
+xlabel('Time (sec)');
+ylabel('Displacement (m)');
+legend('No Feedback Control','Feedback Control');
