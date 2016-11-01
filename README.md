@@ -6,5 +6,4 @@ It will call the LQR_timevarying ftn, which in turn calls the P_dot one.
 Right now the example has a constant A. However, if A varies with time, it would be easy to modify LQR_test to store A at each time step in a different cell. The LQR_timevarying function will not have to change.
 
 ISSUES
--Something wrong with using small values of R(t). Need to investigate further.
--I haven't quite figured out what to do with K(t) once I find it. There are some plots I was playing around with but they are not what I'm looking for.
+-Does not work for R=0.01 (this is what Patrick's code uses). There's an inv(R) in there that makes the K-values very large. It works fine for 0.1
