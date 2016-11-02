@@ -40,8 +40,8 @@ x1(1)=0.2; %position
 x2(1)=0; %velocity
 dt=t(2)-t(1);
 for i=1:length(t)-1
-    x1_intermed=x1(i)+dt/2*x1_dot(A{i},B{i},x1(i),x2(i),F);
-    x2_intermed=x2(i)+dt/2*x2_dot(A{i},B{i},x1(i),x2(i),F);
+    x1_intermed=x1(i)+dt*x1_dot(A{i},B{i},x1(i),x2(i),F);
+    x2_intermed=x2(i)+dt*x2_dot(A{i},B{i},x1(i),x2(i),F);
     x1(i+1)=x1(i)+dt/2*(x1_dot(A{i},B{i},x1(i),x2(i),F)+...
         x1_dot(A{i+1},B{i+1},x1_intermed,x2_intermed,F));
     x2(i+1)=x2(i)+dt/2*(x2_dot(A{i},B{i},x1(i),x2(i),F)+...
@@ -52,8 +52,8 @@ end
 x1c(1)=0.2;
 x2c(1)=0;
 for i=1:length(t)-1
-    x1c_intermed=x1c(i)+dt/2*x1_feedback(A{i},B{i},K{i},x1c(i),x2c(i));
-    x2c_intermed=x2c(i)+dt/2*x2_feedback(A{i},B{i},K{i},x1c(i),x2c(i));
+    x1c_intermed=x1c(i)+dt*x1_feedback(A{i},B{i},K{i},x1c(i),x2c(i));
+    x2c_intermed=x2c(i)+dt*x2_feedback(A{i},B{i},K{i},x1c(i),x2c(i));
     x1c(i+1)=x1c(i)+dt/2*(x1_feedback(A{i},B{i},K{i},x1c(i),x2c(i))+...
         x1_feedback(A{i+1},B{i+1},K{i+1},x1c_intermed,x2c_intermed));
     x2c(i+1)=x2c(i)+dt/2*(x2_feedback(A{i},B{i},K{i},x1c(i),x2c(i))+...
